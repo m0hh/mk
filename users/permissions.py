@@ -17,3 +17,20 @@ class UpdatePermission(permissions.BasePermission):
             return True
 
         return False
+
+class ModeerPermission(permissions.BasePermission):
+
+    edit_methods = ("POST",)
+
+    def has_permission(self, request, view):
+        if request.user.is_authenticated:
+            return True
+
+    def has_object_permission(self, request, view, obj):
+        if request.user.is_superuser:
+            return True
+
+        if request.user.info.rank == "modeer" or request.user.info.rank == "raeesarkan":
+            return True
+
+        return False

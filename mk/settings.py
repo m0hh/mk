@@ -25,7 +25,7 @@ SECRET_KEY = '((1t9jnrqauy&7gjzq=66crz8ka$d-tei5yxci(m!q((%3)%xw'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["1c69-156-200-255-19.ngrok.io"]
 
 
 
@@ -39,6 +39,7 @@ CORS_ORIGIN_WHITELIST = [
 ]
 
 INSTALLED_APPS = [
+    'django_filters',
     'users',
     'rest_framework',
     'rest_framework.authtoken',
@@ -140,5 +141,7 @@ FILE_UPLOAD_TEMP_DIR = BASE_DIR
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
-    ]
+    ],
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+
 }

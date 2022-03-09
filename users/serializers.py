@@ -2,7 +2,7 @@ from dataclasses import field
 from statistics import mode
 from rest_framework import serializers
 
-from users.models import Doc,UserDetail
+from users.models import Doc,UserDetail,Dep
 
 
 class DocSerializer(serializers.ModelSerializer):
@@ -10,21 +10,29 @@ class DocSerializer(serializers.ModelSerializer):
     #    many = kwargs.pop('many',True)
     #    super(DocSerializer,self).__init__(many=many,*args, **kwargs)
     branchname = serializers.SerializerMethodField(read_only=True)
+    department = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Doc
-        fields = ('id','name',"users","branch","coming","descr","created_by","branchname")
+        fields = ('id','name',"users","department","coming","descr","created_by","branchname","date","sec_id","approved")
     def get_branchname(self,doc):
         return doc.branch.name
+    def get_department(self,doc):
+        return doc.dep.name
     
 
 class CreateDocSerializer(serializers.ModelSerializer):
     branchname = serializers.SerializerMethodField(read_only=True)
+    department = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Doc
-        fields  = ("name","descr",'users',"branch","coming","created_by","date","branchname" )
+        fields  = ("name","descr",'users',"branch","coming","created_by","date","branchname","doc","op1","op2","department","dep")
         read_only_fields = ['users',"branch","coming","created_by","branchname"]
     def get_branchname(self,doc):
         return doc.branch.name
+    def get_department(self,doc):
+        return doc.dep.name
 
 class UpdateDocSerializer(serializers.ModelSerializer):
     class Meta:
@@ -44,3 +52,8 @@ class AllusersSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserDetail
         fields = "__all__"
+
+class DepsSeralizer(serializers.ModelSerializer):
+    class Meta:
+        model = Dep 
+        fields= "__all__"

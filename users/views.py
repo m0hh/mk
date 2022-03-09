@@ -1,12 +1,18 @@
 from pyexpat import model
+from re import U
+from unicodedata import name
+from urllib import request
+from django import views
+from rest_framework import viewsets
+from django_filters import rest_framework as filters
 from django.shortcuts import render
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.parsers import FormParser,MultiPartParser,JSONParser
 
-from users.serializers import AllusersSerializer, DocSerializer, CreateDocSerializer,PermListSerializer, UpdateDocSerializer
-from .models import UserDetail, Doc,Branches
+from users.serializers import AllusersSerializer, DepsSeralizer, DocSerializer, CreateDocSerializer,PermListSerializer, UpdateDocSerializer
+from .models import Dep, UserDetail, Doc,Branches
 from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework import authentication, permissions
@@ -16,24 +22,34 @@ from datetime import datetime
 from django.http import HttpResponse
 from wsgiref.util import FileWrapper
 from django.db.models import Q
-from .permissions import UpdatePermission
+from .permissions import UpdatePermission, ModeerPermission
 from rest_framework import status
 from django.views.generic import DetailView
-import reportlab
-import io
 from django.http import FileResponse
 from reportlab.pdfgen import canvas
+import os
+from django.core.files import File
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 
 
-def sign(f1,f2,num):
+
+
+
+
+def sign(f1,u,d,nm,madany):
+    """    c = canvas.Canvas("ww")
+    c.drawImage(f2, 450, 1, width=100,height=30)
+    c.save()
+
     file1 = PdfFileReader(open(f1, "rb"))
-    file2 = PdfFileReader(open(f2, "rb"))
+    file2 = PdfFileReader(open("ww", "rb"))
 
     output = PdfFileWriter()
 
-    page = file1.getPage(0)
+    page = file1.getPage(-1)
     page.mergePage(file2.getPage(0))
 
     output.addPage(page)
@@ -42,7 +58,48 @@ def sign(f1,f2,num):
     output.write(outputStream)
 
     outputStream.close()
+    """
+    c = canvas.Canvas('watermark.pdf')
+    im = UserDetail.objects.get(id = u)
+    # Draw the image at x, y. I positioned the x,y to be where i like here
+    if madany:
+        c.drawImage(im.imgmadany.path, 30, 1, width=150,height=80)
+    else:
+        c.drawImage(im.img.path, 30, 1, width=150,height=80)
 
+    c.save()
+    #print(c)
+
+
+
+
+    file1 = PdfFileReader(open(f1, "rb"))
+    file2 = PdfFileReader(open("watermark.pdf", "rb"))
+
+    output = PdfFileWriter()
+    for i in range(file1.getNumPages()):
+        if i == file1.getNumPages() -1:
+            page = file1.getPage(i)
+            page.mergePage(file2.getPage(0))
+            output.addPage(page)
+        else:
+            page = file1.getPage(i)
+            output.addPage(page)
+
+    arch = UserDetail.objects.filter(branch = Branches.objects.filter(name= "archive")[0])[0]
+    outputStream = open(nm, "wb")
+    output.write(outputStream)
+    outputStream.close()
+    dd = Doc.objects.get(id = d)
+    l = open(nm,"rb")
+    ll = File(l)
+    dd.doc = ll
+    dd.approved = True
+    dd.users = arch
+    dd.save()
+    l.close()
+    os.remove(f1)
+    os.remove("watermark.pdf")
 
 class DocsView(APIView):
     """
@@ -69,6 +126,7 @@ class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data,
                                            context={'request': request})
+
         if serializer.is_valid():
             user = serializer.validated_data['user']
             token, created = Token.objects.get_or_create(user=user)
@@ -85,6 +143,7 @@ class CustomAuthToken(ObtainAuthToken):
             return Response({
                 "8alat pass" : "pass 8alat"
             },status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class DocCreate(generics.CreateAPIView):
@@ -144,7 +203,7 @@ class LowerPermList(APIView):
     authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request,branchh, format=None):
+    def get(self, request, format=None):
         """
         Return a list of all users.
         """
@@ -154,11 +213,11 @@ class LowerPermList(APIView):
             susers = UserDetail.objects.filter(rank = "saf",branch = user.branch)
         elif user.rank == "superzabet":
             susers = UserDetail.objects.filter(Q(rank = "zabet")|Q(rank="saf"),branch = user.branch)
-        elif user.rank == "modeer":
-            susers = UserDetail.objects.filter(rank = "raeesarkan")
+        #elif user.rank == "modeer":
+            #susers = UserDetail.objects.filter(rank = "raeesarkan")
 
-        elif user.rank == "raeesarkan":
-            susers = UserDetail.objects.filter(Q(rank = "zabet") |Q(rank="superzabet"),branch = Branches.objects.get(name=branchh))
+        #elif user.rank == "raeesarkan":
+            #susers = UserDetail.objects.filter(Q(rank = "zabet") |Q(rank="superzabet"),branch = Branches.objects.get(name=branchh))
         else:
             return Response({"No objects With that ID": "Try a dffrent ID"})
 
@@ -212,6 +271,37 @@ class Allusers(generics.ListAPIView):
     serializer_class  = AllusersSerializer
 
 
-    
+class Deps(generics.ListAPIView):
+    queryset = Dep.objects.all()
+    serializer_class = DepsSeralizer
 
-    
+class Approve(APIView):
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [ModeerPermission]
+    def post(self, request, format=None):
+        if "docid" in request.data and request.user.info.img != None and  request.user.info.imgmadany != None and "madany" in request.data:
+            d = request.data["docid"]
+            dc = Doc.objects.get(id = d)
+            f = dc.doc.path
+            u = request.user.info.id
+            nm = dc.name
+            sign(f,u,d,nm,request.data["madany"])
+            return Response({"cool":"all right"})
+        else:
+            return Response({"Forbidden": "you need to add pic or send docid in body"}, status= status.HTTP_400_BAD_REQUEST)
+
+
+class Search(generics.ListAPIView):
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = DocSerializer
+    model = Doc
+    filter_backends = [filters.SearchFilter,DjangoFilterBackend]
+    search_fields = ['name']
+    filterset_fields = ["date","id","sec_id"]
+
+    def get_queryset(self):
+        if self.request.user.info.branch.name == "archive" or self.request.user.info.rank  == "modeer" or self.request.user.info.rank == "raeesarkan":
+            return Doc.objects.filter(approved = True).order_by("-date")
+        else:
+            return Doc.objects.filter(approved = True, branch = self.request.user.info.branch).order_by("-date")
