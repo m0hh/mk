@@ -53,6 +53,7 @@ class UserDetail(models.Model):
 class Doc(models.Model):
     name = models.CharField(max_length=300,default= "Report")
     doc = models.FileField(upload_to='files/')
+    pdf = models.FileField(upload_to='files/',blank=True,null=True)
     op1 = models.FileField(upload_to='files/',blank=True,null=True)
     op2 = models.FileField(upload_to='files/',blank=True,null=True)
     coming = models.ForeignKey("UserDetail",related_name='sent',on_delete=models.PROTECT) 

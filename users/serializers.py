@@ -27,8 +27,8 @@ class CreateDocSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Doc
-        fields  = ("name","descr",'users',"branch","coming","created_by","date","branchname","doc","op1","op2","department","dep")
-        read_only_fields = ['users',"branch","coming","created_by","branchname"]
+        fields  = ("name","descr",'users',"branch","coming","created_by","date","branchname","doc","op1","op2","department","dep","id","pdf")
+        read_only_fields = ['users',"branch","coming","created_by","branchname","pdf"]
     def get_branchname(self,doc):
         return doc.branch.name
     def get_department(self,doc):

@@ -32,15 +32,39 @@ from django.core.files import File
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
 
+import docx
+from docx.shared import Cm
+import subprocess
+
+#libreoffice
+
+def sign(fname, img,user,docu):
+    doc = docx.Document(fname)
+    
+
+    doc.add_picture(img,width= Cm(5), height = Cm(2))
+    
+    doc.save(fname)
+    docu.save()
+
+    output = subprocess.check_output(['abiword', '--convert-to', 'pdf' ,fname])
+    pdfname = fname.replace("docx", "pdf")
+    pdfname = pdfname.replace("files/", "")
+    docu.pdf = pdfname
+    arch = UserDetail.objects.filter(branch = Branches.objects.filter(name= "archive")[0])[0]
+    docu.users = arch
+    docu.approved = True
+    docu.save()
+    
 
 
 
 
 
 
-
+"""
 def sign(f1,u,d,nm,madany):
-    """    c = canvas.Canvas("ww")
+        c = canvas.Canvas("ww")
     c.drawImage(f2, 450, 1, width=100,height=30)
     c.save()
 
@@ -58,7 +82,8 @@ def sign(f1,u,d,nm,madany):
     output.write(outputStream)
 
     outputStream.close()
-    """
+    
+
     c = canvas.Canvas('watermark.pdf')
     im = UserDetail.objects.get(id = u)
     # Draw the image at x, y. I positioned the x,y to be where i like here
@@ -100,6 +125,8 @@ def sign(f1,u,d,nm,madany):
     l.close()
     os.remove(f1)
     os.remove("watermark.pdf")
+
+"""
 
 class DocsView(APIView):
     """
@@ -155,23 +182,28 @@ class DocCreate(generics.CreateAPIView):
     def perform_create(self, serializer):
         serializer.save(users = UserDetail.objects.get(id =self.request.data["user"]), branch = self.request.user.info.branch,coming = self.request.user.info,
         created_by = self.request.user.info)
+        output = subprocess.check_output(['libreoffice', '--convert-to', 'pdf' ,str(serializer.instance.doc.path)])
+        fname = str(serializer.instance.doc.path).replace("docx", "pdf")
+        fname = fname.replace("files/", "")
 
-class DocDetail(generics.RetrieveAPIView):
+        serializer.save(pdf = fname)
+
+
+"""class DocDetail(generics.RetrieveAPIView):
     authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     #queryset = Doc.objects.all()
     #serializer_class = DocSerializer
     
     def put(self, request, format=None):
-        """
-        Return a list of all users.
-        """
+    
+        
         d =request.data['id']
         obj = Doc.objects.get(id = d)
         #obj  = self.get_object()
         fil = open(obj.doc.path, 'rb')
         response = HttpResponse(FileWrapper(fil), content_type='application/pdf')
-        return response
+        return response"""
 
 class PermList(APIView):
     authentication_classes = [authentication.TokenAuthentication]
@@ -250,7 +282,7 @@ class Showpdf(APIView):
       # Create a file-like buffer to receive PDF data.
     def get(self, request,id, format=None):
         dcc = Doc.objects.get(id = id)
-        return FileResponse(open(dcc.doc.path, 'rb'), as_attachment=True, content_type='application/pdf')
+        return FileResponse(open(dcc.pdf.path, 'rb'), as_attachment=True, content_type='application/pdf')
 class Shop1(APIView):
     authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
@@ -282,10 +314,12 @@ class Approve(APIView):
         if "docid" in request.data and request.user.info.img != None and  request.user.info.imgmadany != None and "madany" in request.data:
             d = request.data["docid"]
             dc = Doc.objects.get(id = d)
-            f = dc.doc.path
-            u = request.user.info.id
-            nm = dc.name
-            sign(f,u,d,nm,request.data["madany"])
+            fname = dc.doc.path
+            u = request.user.info
+            if request.data["madany"]:
+                sign(fname,u.imgmadany.path,u,dc)
+            else:
+                sign(fname,u.img.path,u,dc)
             return Response({"cool":"all right"})
         else:
             return Response({"Forbidden": "you need to add pic or send docid in body"}, status= status.HTTP_400_BAD_REQUEST)

@@ -1,12 +1,11 @@
 from venv import create
 from django.urls import path
-from .views import  Allusers, Approve, CustomAuthToken,DocsView,DocCreate,DocDetail,PermList, Search, Shop1, Showop1, UpdateDoc,LowerPermList,Showpdf,Deps
+from .views import  Allusers, Approve, CustomAuthToken,DocsView,DocCreate,PermList, Search, Shop1, Showop1, UpdateDoc,LowerPermList,Showpdf,Deps
 
 urlpatterns = [
     path('api-token-auth/', CustomAuthToken.as_view()),
     path('docslist/',DocsView.as_view()),
     path('docscreate/',DocCreate.as_view()),
-    path("docsdetail/",DocDetail.as_view()),
     path("permlist/",PermList.as_view()),
     path("updatedoc/<pk>",UpdateDoc.as_view()),
     path("lowerpermlist/",LowerPermList.as_view()),
