@@ -31,6 +31,7 @@ import os
 from django.core.files import File
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
+from docx2pdf import convert
 
 import docx
 from docx.shared import Cm
@@ -47,9 +48,12 @@ def sign(fname, img,user,docu):
     doc.save(fname)
     docu.save()
 
-    output = subprocess.check_output(['abiword', '--convert-to', 'pdf' ,fname])
+    
+    
+
+    convert("files\"+fname)
     pdfname = fname.replace("docx", "pdf")
-    pdfname = pdfname.replace("files/", "")
+    #pdfname = pdfname.replace("files/", "")
     docu.pdf = pdfname
     arch = UserDetail.objects.filter(branch = Branches.objects.filter(name= "archive")[0])[0]
     docu.users = arch
