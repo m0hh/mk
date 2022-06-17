@@ -37,7 +37,7 @@ def sign(fname, img,user,docu):
 
     output = subprocess.check_output(['libreoffice', '--convert-to', 'pdf' ,fname])
     pdfname = fname.replace("docx", "pdf")
-    pdfname = pdfname.replace("files/", "")
+    #pdfname = pdfname.replace("files/", "")
     docu.pdf = pdfname
     arch = UserDetail.objects.filter(branch = Branches.objects.filter(name= "archive")[0])[0]
     docu.users = arch
