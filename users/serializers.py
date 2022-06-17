@@ -6,15 +6,12 @@ from users.models import Doc,UserDetail,Dep
 
 
 class DocSerializer(serializers.ModelSerializer):
-    #def __init__(self, *args, **kwargs):
-    #    many = kwargs.pop('many',True)
-    #    super(DocSerializer,self).__init__(many=many,*args, **kwargs)
     branchname = serializers.SerializerMethodField(read_only=True)
     department = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Doc
-        fields = ('id','name',"users","department","coming","descr","created_by","branchname","date","sec_id","approved")
+        fields = ('id','name',"users","department","coming","descr","created_by","branchname","date","sec_id","approved","op1","op2")
     def get_branchname(self,doc):
         return doc.branch.name
     def get_department(self,doc):

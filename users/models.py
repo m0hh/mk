@@ -10,20 +10,14 @@ from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
 RANK_CHOICES = (
-    ('saf','SAF'),
-    ('zabet', 'ZABET'),
-    ('superzabet','SUPERZABET'),
-    ('modeer','MODEER'),
-    ('raeesarkan','RAEESARKAN'),
+    ('Employee','EMPLOYEE'),
+    ('Supervisor', 'SUPERVISOR'),
+    ('Manager','Manager'),
+    ('CTO','CTO'),
+    ('CEO','CEO'),
     ("archive","ARCHIVE")
 )
-"""BRANCH_CHOICES = (
-    ('ramsees','RAMSEES'),
-    ('nasrcity', 'NASRCITY'),
-    ('tagamo3','TAGAMO3'),
-    ("modeer","MODEER"),
-    ('raeesarkan','RAEESARKAN'),
-)"""
+
 
 class Branches(models.Model):
     name = models.CharField(max_length=400)
@@ -44,7 +38,6 @@ class UserDetail(models.Model):
     branch = models.ForeignKey(Branches,on_delete=models.PROTECT,related_name="users")
     user = models.OneToOneField(User,on_delete=models.CASCADE,related_name='info')
     img = models.ImageField(upload_to= "files/",blank= True, null = True)
-    imgmadany = models.ImageField(upload_to= "files/",blank= True, null = True)
     
 
     def __str__(self):
@@ -59,7 +52,6 @@ class Doc(models.Model):
     coming = models.ForeignKey("UserDetail",related_name='sent',on_delete=models.PROTECT) 
     users = models.ForeignKey("UserDetail",related_name='docs',on_delete=models.PROTECT, null=True,blank=True) 
     approved = models.BooleanField(default=False)
-    #branch = models.CharField(max_length=100,choices=BRANCH_CHOICES)
     branch = models.ForeignKey(Branches,on_delete=models.PROTECT,related_name="docs")
     descr = models.TextField(blank=True,null=True)
     date = models.DateField(auto_now_add=True)

@@ -30,7 +30,7 @@ class ModeerPermission(permissions.BasePermission):
         if request.user.is_superuser:
             return True
 
-        if request.user.info.rank == "modeer" or request.user.info.rank == "raeesarkan":
+        if request.user.info.rank == "CEO" or request.user.info.rank == "CTO":
             return True
 
         return False
