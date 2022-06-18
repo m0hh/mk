@@ -135,3 +135,74 @@ you will recive a list of all documents in this user inbox like this
 
  the new elements here are sec_id which we added to allow the archive manager to add a second ID to manage the documents
  and approved which is to determine if the document is approved and has been automatically signed
+ 
+ ### Send a document to another user or any kind of update document
+ to update document you send a PATCH request to updatedoc/<PK of document>
+ with request like this
+ 
+```
+ {
+    "users" :15
+ }
+```
+ Here we specified the user to send this document to 
+ the response will come like this
+ ```
+ {
+    "id": 52,
+    "name": "doc1",
+    "doc": "http://127.0.0.1:8000/files/Untitled_1_L0tOT1u.docx",
+    "pdf": "http://127.0.0.1:8000/home/mohamed/Documents/mk/Untitled_1.pdf",
+    "op1": null,
+    "op2": null,
+    "approved": false,
+    "descr": "aucsc",
+    "date": "2022-06-17",
+    "sec_id": null,
+    "coming": 14,
+    "users": 15,
+    "branch": 6,
+    "created_by": 12,
+    "dep": 3
+}
+```
+ we see that users changed from 14 to 15 indicating that we sent the document to user 15
+ 
+ ### Get list of superior users to send documents to
+ If you want to create document or send a document(update) you will need a list of all superior users in the same branch
+ to do that send a GET request to permlist/
+ you will recive a response like this
+ ```
+ [
+    {
+        "id": 15,
+        "uname": "mahmoudManager",
+        "rank": "Manager",
+        "branch": 6
+    }
+]
+```
+ Note that the list will contain all users directly above the request sender who are in the same branch as he is
+ 
+ ### Get list of all subordinates
+ 
+ to get a list of users directly below the request sender you will send a GET request to this url lowerpermlist/
+ 
+ you will recive a response like this
+ ```
+ [
+    {
+        "id": 12,
+        "uname": "AhmedEmployee",
+        "rank": "Employee",
+        "branch": 6
+    },
+    {
+        "id": 13,
+        "uname": "Ahmed2Empolyee",
+        "rank": "Employee",
+        "branch": 6
+    }
+]
+```
+ 
