@@ -205,4 +205,126 @@ you will recive a list of all documents in this user inbox like this
     }
 ]
 ```
+ ### preview a pdf
+ to preview a pdf send a a GET request to this url pdf/<id of the document>
+ you will recive the pdf file as response
+ 
+ ### preview optional
+ to preview optional document 1 send GET request to op1/<id> for optional document 1 and op2/<id> for optional document 2
+ you will recive the optional document file as a response
+ 
+ ### List of users
+ to get a list of all users send a GET request to this allusers/
+ you will recive a Document like this
+ ```
+ [
+    {
+        "id": 12,
+        "rank": "Employee",
+        "branch": 6,
+        "uname": "AhmedEmployee"
+    },
+    {
+        "id": 13,
+        "rank": "Employee",
+        "branch": 6,
+        "uname": "Ahmed2Empolyee"
+    },
+    {
+        "id": 14,
+        "rank": "Supervisor",
+        "branch": 6,
+        "uname": "AymanSupervisor"
+    },
+    {
+        "id": 15,
+        "rank": "Manager",
+        "branch": 6,
+        "uname": "mahmoudManager"
+    },
+    {
+        "id": 16,
+        "rank": "CTO",
+        "branch": 7,
+        "uname": "EzzCTO"
+    },
+    {
+        "id": 17,
+        "rank": "CEO",
+        "branch": 7,
+        "uname": "YaraCEO"
+    },
+    {
+        "id": 18,
+        "rank": "archive",
+        "branch": 8,
+        "uname": "Anasarchive"
+    }
+]
+```
+ ### List all Departments
+ To list all departments send a GET request to this dep/
+ 
+ you will recive a response like this
+ ```
+ [
+    {
+        "id": 3,
+        "name": "Accounting"
+    },
+    {
+        "id": 4,
+        "name": "Sales"
+    },
+    {
+        "id": 5,
+        "name": "IT"
+    }
+]
+```
+ Note that you Can do all CRUD operations on Department via the admin panel
+ 
+ ### Approve the document
+ First you ned to add a signature a a picture to the UserDetail table via the admin panel to the CEO and CTO
+ I also added a permission that allows only the CEO and CTO of approving Documents
+ to approve a Document send POST request to this url approve/
+ like this
+```
+{
+    "docid": 52
+}
+ ```
+ you will recive a response like this
+ ```
+{"approved":"True"}
+ 
+ ### Search
+ to search for a document you can send a GET request to search?name=actual name that will search by name
+ or search?date=date that will filter by date
+ or search?id= id  that will filter by ID
+ or search?sec_id= Secondary Id that will filter by secondary ID
+ 
+ and you will recive a response like this
+ ```
+ [
+    {
+        "id": 52,
+        "name": "doc1",
+        "users": 18,
+        "department": "Accounting",
+        "coming": 15,
+        "descr": "aucsc",
+        "created_by": 12,
+        "branchname": "Haram",
+        "date": "2022-06-17",
+        "sec_id": null,
+        "approved": true,
+        "op1": null,
+        "op2": null
+    }
+]
+ ```
+ ### Delete a document
+ To delete a document send a DELETE request to this url delete/<pk>
+ but you have to be the document owner as in {users: ID of the request sender
  
