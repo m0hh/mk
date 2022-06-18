@@ -1,5 +1,5 @@
-# Heirarchial Correspendece and signature stystem
- This a system where employees can send correspendeces to emplyee directly above them and can return the correspence to employees directly beneath them. The correspendence stays in the system until it finally reaches the CEO or CTO who can approve it and it will automatically add their signature to the document and be sent to the archive
+# Heirarchial correspondence and signature stystem
+ This a system where employees can send correspondence to employees directly above them and can return the correspence to employees directly beneath them. The correspondence stays in the system until it finally reaches the CEO or CTO who can approve it and it will automatically add their signature to the document and be sent to the archive
  
  Here is a breakdown of the ranks in the system
  
@@ -23,6 +23,11 @@ Initialize database:
 
     python3 manage.py makemigrations
     python3 manage.py migrate
+    
+ ## How The system works
+ to create a document you need to fetch the list of all superior employees(see in documentation)
+ and once you grab the list send the required data to create a document (see in documentation) and send it to the create document endpoint(see in documentation) with desired employee to send this document to.
+ once you understand that concept everything else will be pretty intuitive
   
   ## Documentation
   
