@@ -303,6 +303,7 @@ you will recive a list of all documents in this user inbox like this
  ```
 {"approved":"True"}
  
+ ```
  ### Search
  to search for a document you can send a GET request to search?name=actual name that will search by name
  or search?date=date that will filter by date
