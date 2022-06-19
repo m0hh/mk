@@ -52,18 +52,12 @@ def sign(fname, img,user,docu):
 
 
 class DocsView(APIView):
-    """
-    View to list all users in the system.
-
-    * Requires token authentication.
-    """
+    
     authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, format=None):
-        """
-        Return a list of all users.
-        """
+   
         queryset = request.user.info.docs.all()
         serializer = DocSerializer(queryset,many=True)
         return Response(serializer.data)
@@ -90,7 +84,7 @@ class CustomAuthToken(ObtainAuthToken):
             })
         else:
             return Response({
-                "8alat pass" : "pass 8alat"
+                "Unauthorized" : "Wrong username or password"
             },status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -102,17 +96,14 @@ class DocCreate(generics.CreateAPIView):
     serializer_class  = CreateDocSerializer
     parser_classes = (MultiPartParser, FormParser,)
     def perform_create(self, serializer):
-        try:
-            serializer.save(users = UserDetail.objects.get(id =self.request.data["user"]), branch = self.request.user.info.branch,coming = self.request.user.info,
-            created_by = self.request.user.info)
-            output = subprocess.check_output(['libreoffice', '--convert-to', 'pdf' ,serializer.instance.doc.path])
-            fname = str(serializer.instance.doc.path).replace("docx", "pdf")
-            fname = fname.replace("files/", "")
+    
+        serializer.save(users = UserDetail.objects.get(id =self.request.data["user"]), branch = self.request.user.info.branch,coming = self.request.user.info,
+        created_by = self.request.user.info)
+        output = subprocess.check_output(['libreoffice', '--convert-to', 'pdf' ,serializer.instance.doc.path])
+        fname = str(serializer.instance.doc.path).replace("docx", "pdf")
+        fname = fname.replace("files/", "")
+        serializer.save(pdf = fname)
 
-            serializer.save(pdf = fname)
-        except:
-            serializer.instance.delete()
-            raise ValueError
 
 
 
@@ -121,9 +112,7 @@ class PermList(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, format=None):
-        """
-        Return a list of all users.
-        """
+    
         user = UserDetail.objects.get(user= request.user)
         if user.rank == "Employee":
             susers = UserDetail.objects.filter(Q(rank = "Supervisor") | Q(rank = "Manager"),branch = user.branch)
@@ -147,13 +136,11 @@ class LowerPermList(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, format=None):
-        """
-        Return a list of all users.
-        """
+
         user = UserDetail.objects.get(user= request.user)
 
         if user.rank == "Supervisor":
-            susers = UserDetail.objects.filter(rank = "Emplyee",branch = user.branch)
+            susers = UserDetail.objects.filter(rank = "Employee",branch = user.branch)
         elif user.rank == "Manager":
             susers = UserDetail.objects.filter(Q(rank = "Supervisor")|Q(rank="Employee"),branch = user.branch)
         else:
@@ -183,7 +170,6 @@ class UpdateDoc(generics.UpdateAPIView):
 
 class Showpdf(APIView):
 
-      # Create a file-like buffer to receive PDF data.
     def get(self, request,id, format=None):
         dcc = Doc.objects.get(id = id)
         fil = open(dcc.pdf.path, 'rb')
@@ -191,7 +177,6 @@ class Showpdf(APIView):
         return response
 class Shop1(APIView):
 
-      # Create a file-like buffer to receive PDF data.
     def get(self, request,id, format=None):
         dcc = Doc.objects.get(id = id)
         fil = open(dcc.op1.path, 'rb')
@@ -199,7 +184,6 @@ class Shop1(APIView):
         return response
 class Showop1(APIView):
 
-      # Create a file-like buffer to receive PDF data.
     def get(self, request,id, format=None):
         dcc = Doc.objects.get(id = id)
         fil = open(dcc.op2.path, 'rb')
@@ -219,13 +203,13 @@ class Approve(APIView):
     authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [ModeerPermission]
     def post(self, request, format=None):
-        if "docid" in request.data and request.user.info.img != None and  request.user.info.imgmadany != None :
+        if "docid" in request.data and request.user.info.img != None :
             d = request.data["docid"]
             dc = Doc.objects.get(id = d)
             fname = dc.doc.path
             u = request.user.info
             sign(fname,u.img.path,u,dc)
-            return Response({"cool":"all right"})
+            return Response({"Approved":"True"})
         else:
             return Response({"Forbidden": "you need to add pic or send docid in body"}, status= status.HTTP_400_BAD_REQUEST)
 

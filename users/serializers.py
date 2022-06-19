@@ -46,9 +46,13 @@ class PermListSerializer(serializers.ModelSerializer):
 
 
 class AllusersSerializer(serializers.ModelSerializer):
+    uname = serializers.SerializerMethodField(read_only=True)
     class Meta:
-        model = UserDetail
-        fields = "__all__"
+        model = UserDetail  
+        fields = ("id","rank","branch", "uname")
+    def get_uname(self,userdetail):
+        return userdetail.user.username
+        
 
 class DepsSeralizer(serializers.ModelSerializer):
     class Meta:
