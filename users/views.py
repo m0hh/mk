@@ -26,6 +26,7 @@ import docx
 from docx.shared import Cm
 import subprocess
 
+# The sign function
 def sign(fname, img,user,docu):
     doc = docx.Document(fname)
     
